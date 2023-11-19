@@ -147,7 +147,7 @@ def get_block(block_index):
 
 @app.route("/block", methods=["POST"])
 def post_block():
-    return jsonify("block"),  201
+    return jsonify("block"), 201
 
 
 @app.route("/transaction", methods=["POST"])
@@ -159,6 +159,7 @@ def post_transaction():
 API for interacting with the user
 only accept request from the localhost
 
+- GET /getactivepeers: get all active peers, to display in the GUI
 - POST /transaction: create a new transaction
 - GET /unspentoutput: get all unspent outputs
 - GET /mine: mine a new block
@@ -171,6 +172,13 @@ only accept request from the localhost
 - GET /static/media/<path:filename>: serve the React GUI
 - GET /<path:filename>: serve the React GUI
 """
+
+
+@app.route("/getactivepeers", methods=["GET"])
+def get_active_peers():
+    if request.remote_addr != "127.0.0.1":
+        abort(403)
+    return jsonify(list(PEER_NODES))
 
 
 @app.route("/transaction", methods=["POST"])
