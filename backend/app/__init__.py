@@ -1,5 +1,4 @@
 import socket
-
 import requests
 from flask import Flask, request, abort, send_from_directory, render_template, jsonify
 
@@ -11,26 +10,26 @@ PEER_NODES = {"http://10.2.0.2:5000/"}  # a set
 PORT = 5000
 
 
-def broadcast_block(data):
+def broadcast_block(block):
     global PEER_NODES
 
     clear_dead_nodes()
     for peer in PEER_NODES:
         try:
-            response = requests.post(peer + "/block", json=data)
+            response = requests.post(peer + "/block", json=block)
         except requests.exceptions.ConnectionError:
             continue
         if response.status_code == 201:
             print(response.json())
 
 
-def broadcast_transaction(data):
+def broadcast_transaction(transaction):
     global PEER_NODES
 
     clear_dead_nodes()
     for peer in PEER_NODES:
         try:
-            response = requests.post(peer + "/transaction", json=data)
+            response = requests.post(peer + "/transaction", json=transaction)
         except requests.exceptions.ConnectionError:
             continue
         if response.status_code == 201:
