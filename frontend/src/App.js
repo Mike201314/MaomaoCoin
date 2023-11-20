@@ -4,7 +4,8 @@ import {useEffect, useState} from "react";
 export default function App() {
     return (
         <Layout>
-            <h1>Hello, this is your MaomaoCoin GUI</h1>
+            <h1 className={"text-3xl font-bold"}>Hello, this is your MaomaoCoin GUI</h1>
+
             <Section title={"Wallet"}>1</Section>
             <Section title={"Online Peers"}>
                 <Peers/>
@@ -16,9 +17,9 @@ export default function App() {
 
 function Section({children,title}) {
   return (
-      <div className={"flex flex-col gap-3 w-full max-w-[1200px] m-auto p-3"}>
+      <div className={"flex flex-col border-2 rounded-xl shadow-md backdrop-blur-xl gap-3 w-full max-w-[1200px] m-3 p-7"}>
           <h1 className={"font-bold text-3xl"}>{title}</h1>
-          <div className={"border-2 rounded-xl shadow-md p-5"}>
+          <div className={""}>
               {children}
           </div>
 

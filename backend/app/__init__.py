@@ -257,7 +257,7 @@ def index_media(filename):
 
 
 """
-Error handlers: customize the error page for the server
+Error handlers: customize the error pages for the server
 to provide hint on how to use this app
 """
 
@@ -265,6 +265,11 @@ to provide hint on how to use this app
 @app.errorhandler(403)
 def forbidden(e):
     return render_template("403.html"), 403
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template("500.html"), 500
 
 
 # start the server
