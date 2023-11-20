@@ -5,9 +5,9 @@ from flask import Flask, request, abort, send_from_directory, render_template, j
 app = Flask(__name__)
 
 # the address of the node
-# if it is empty, this node will run as a root node
-PEER_NODES = {"http://10.2.0.2:5000/"}  # a set
-PORT = 5000
+# if it is empty, or only contain invalid address, this node will run as a root node
+PEER_NODES = {"http://192.168.0.31:5000/"}  # a set
+PORT = 5002
 
 
 def broadcast_block(block):
@@ -159,12 +159,12 @@ def post_transaction():
 API for interacting with the user
 only accept request from the localhost
 
-- GET /getactivepeers: get all active peers, to display in the GUI
+- GET /getActivePeers: get all active peers, to display in the GUI
 - POST /transaction: create a new transaction
-- GET /unspentoutput: get all unspent outputs
+- GET /unspentOutput: get all unspent outputs
 - GET /mine: mine a new block
-- GET /newwallet: get a new wallet
-- POST /loadwallet: load a wallet 
+- GET /newWallet: get a new wallet
+- POST /loadWallet: load a wallet 
 
 - GET /: serve the React GUI
 - GET /static/js/<path:filename>: serve the React GUI
@@ -174,10 +174,14 @@ only accept request from the localhost
 """
 
 
-@app.route("/getactivepeers", methods=["GET"])
+@app.route("/getActivePeers", methods=["GET"])
 def get_active_peers():
+    global PEER_NODES
+
     if request.remote_addr != "127.0.0.1":
         abort(403)
+    clear_dead_nodes()
+    print(list(PEER_NODES))
     return jsonify(list(PEER_NODES))
 
 
@@ -188,7 +192,7 @@ def create_transaction():
     return "transaction"
 
 
-@app.route("/unspentoutput", methods=["GET"])
+@app.route("/unspentOutput", methods=["GET"])
 def get_unspent_output():
     if request.remote_addr != "127.0.0.1":
         abort(403)
@@ -202,18 +206,18 @@ def mine():
     return "mine"
 
 
-@app.route("/newwallet", methods=["GET"])
+@app.route("/newWallet", methods=["GET"])
 def new_wallet():
     if request.remote_addr != "127.0.0.1":
         abort(403)
     return "newwallet"
 
 
-@app.route("/loadwallet", methods=["POST"])
+@app.route("/loadWallet", methods=["POST"])
 def load_wallet():
     if request.remote_addr != "127.0.0.1":
         abort(403)
-    return "loadwallet"
+    return "loadWallet"
 
 
 # serve the files for our React GUI
@@ -254,6 +258,7 @@ def index_media(filename):
 
 """
 Error handlers: customize the error page for the server
+to provide hint on how to use this app
 """
 
 
