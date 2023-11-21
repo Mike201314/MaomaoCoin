@@ -1,0 +1,112 @@
+import hashlib
+import time
+from typing import List, Any
+
+class Block:
+    """
+    A class representing a single block in the blockchain.
+
+    Attributes:
+    - index: Numerical index of the block in the blockchain.
+    - transactions: List of transactions included in the block.
+    - timestamp: Time when the block was created.
+    - previous_hash: Hash of the previous block in the chain.
+    - difficulty: Difficulty level for mining the block.
+    - nonce: Random value used in mining to find a valid hash.
+    - merkle_root: Merkle root of the transactions.
+    - hash: Hash of the block.
+    """
+    def __init__(self, index, transactions, previous_hash, difficulty=2):
+        self.index = index
+        self.transactions = transactions
+        self.timestamp = time.time()
+        self.previous_hash = previous_hash
+        self.difficulty = difficulty
+        self.nonce = 0
+        self.merkle_root = self.compute_merkle_root(transactions)
+        self.hash = self.compute_hash()
+
+    def compute_hash(self):
+        """
+        Computes the hash of the block by hashing its contents.
+        """
+        block_content = f"{self.index}{self.timestamp}{self.previous_hash}{self.merkle_root}{self.nonce}"
+        return hashlib.sha256(block_content.encode()).hexdigest()
+
+    def compute_merkle_root(self, transactions: List[Any]) -> str:
+        """
+        Computes the Merkle root of the transactions in the block.
+        """
+        if not transactions:
+            return ''
+
+        transaction_hashes = [hashlib.sha256(str(tx).encode()).hexdigest() for tx in transactions]
+
+        def merkle(trans_hashes):
+            if len(trans_hashes) == 1:
+                return trans_hashes[0]
+
+            if len(trans_hashes) % 2 != 0:
+                trans_hashes.append(trans_hashes[-1])
+
+            updated_hashes = [hashlib.sha256((trans_hashes[i] + trans_hashes[i+1]).encode()).hexdigest()
+                              for i in range(0, len(trans_hashes), 2)]
+
+            return merkle(updated_hashes)
+
+        return merkle(transaction_hashes)
+
+    def mine_block(self):
+        """
+        Mines the block by finding a nonce that produces a hash meeting the difficulty criteria.
+        """
+        target = '0' * self.difficulty
+        while not self.hash.startswith(target):
+            self.nonce += 1
+            self.hash = self.compute_hash()
+
+class Blockchain:
+    """
+    A class representing a simple blockchain.
+
+    Attributes:
+    - chain: List of blocks that form the blockchain.
+    - difficulty: Difficulty level for mining new blocks.
+    """
+    def __init__(self):
+        self.chain = []
+        self.difficulty = 2
+        self.create_genesis_block()
+
+    def create_genesis_block(self):
+        """
+        Creates the genesis block and adds it to the blockchain.
+        """
+        genesis_block = Block(0, [], "0", self.difficulty)
+        genesis_block.mine_block()
+        self.chain.append(genesis_block)
+
+    def add_new_block(self, transactions):
+        """
+        Adds a new block with the given transactions to the blockchain.
+        """
+        last_block = self.chain[-1]
+        new_block = Block(last_block.index + 1, transactions, last_block.hash, self.difficulty)
+        new_block.mine_block()
+        self.chain.append(new_block)
+
+    def print_chain(self):
+        """
+        Prints the contents of each block in the blockchain.
+        """
+        for block in self.chain:
+            print(f"Index: {block.index}, Timestamp: {block.timestamp}, Prev Hash: {block.previous_hash}, "
+                  f"Hash: {block.hash}, Difficulty: {block.difficulty}, Nonce: {block.nonce}, "
+                  f"Merkle Root: {block.merkle_root}, Transactions: {block.transactions}")
+
+# # Example Usage
+# blockchain = Blockchain()
+# blockchain.add_new_block(["Transaction 1", "Transaction 2"])
+# blockchain.add_new_block(["Transaction 3", "Transaction 4"])
+# 
+# blockchain.print_chain()
